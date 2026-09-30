@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isConversationParticipant(conversationId) {
+      let conversation = get(
+        /databases/$(database)/documents/conversations/$(conversationId)
+      );
+      return isSignedIn()
+          && conversation.data.participantIds is list
+          && request.auth.uid in conversation.data.participantIds;
+    }
+
+    function canReadConversationMessages(conversationId) {
+      let conversationPath =
+        /databases/$(database)/documents/conversations/$(conversationId);
+      return isSignedIn()
+          && (!exists(conversationPath)
+              || (get(conversationPath).data.participantIds is list
+                  && request.auth.uid
+                      in get(conversationPath).data.participantIds));
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn()
+          && request.auth.uid == userId;
+    }
+
+    match /conversations/{conversationId} {
+      allow read: if isSignedIn()
+          && request.auth.uid in resource.data.participantIds;
+      allow create: if isSignedIn()
+          && request.resource.data.participantIds is list
+          && request.resource.data.participantIds.size() == 2
+            && (conversationId == request.resource.data.participantIds[0]
+                + '_' + request.resource.data.participantIds[1]
+              || conversationId == request.resource.data.participantIds[1]
+                + '_' + request.resource.data.participantIds[0])
+          && request.auth.uid in request.resource.data.participantIds;
+      allow update: if isSignedIn()
+          && request.auth.uid in resource.data.participantIds
+          && resource.data.participantIds is list
+          && resource.data.participantIds.size() == 2
+          && request.resource.data.participantIds is list
+          && request.resource.data.participantIds.size() == 2
+          && ((request.resource.data.participantIds[0]
+                == resource.data.participantIds[0]
+              && request.resource.data.participantIds[1]
+                == resource.data.participantIds[1])
+            || (request.resource.data.participantIds[0]
+                == resource.data.participantIds[1]
+              && request.resource.data.participantIds[1]
+                == resource.data.participantIds[0]))
+          && (conversationId == request.resource.data.participantIds[0]
+              + '_' + request.resource.data.participantIds[1]
+            || conversationId == request.resource.data.participantIds[1]
+              + '_' + request.resource.data.participantIds[0]);
+
+      match /messages/{messageId} {
+        allow read: if canReadConversationMessages(conversationId);
+        allow create: if isConversationParticipant(conversationId)
+            && request.resource.data.senderId == request.auth.uid
+            && request.resource.data.receiverId
+                in get(/databases/$(database)/documents/conversations/$(conversationId))
+                    .data.participantIds
+            && request.resource.data.status == 'sending'
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0;
+        allow update: if isConversationParticipant(conversationId)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status'])
+            && ((request.auth.uid == resource.data.senderId
+                    && resource.data.status == 'sending'
+                    && request.resource.data.status == 'delivered')
+                || (request.auth.uid == resource.data.receiverId
+                    && request.resource.data.status == 'seen'));
+      }
+    }
+  }
+}

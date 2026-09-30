@@ -1,12 +1,35 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
+
 import '../models/product_model.dart';
 
 class ProductService {
   Future<List<Product>> getAllProducts() async {
-    final jsonString = await rootBundle.loadString('.idea/products.json');
-    final List productsJson = jsonDecode(jsonString);
+    final response = await http.get(
+      Uri.parse('https://dummyjson.com/products?limit=0'),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Unable to load products.');
+    }
+
+    final decodedJson = jsonDecode(response.body) as Map<String, dynamic>;
+    final productsJson = decodedJson['products'] as List? ?? [];
+    return productsJson.map((json) => Product.fromJson(json)).toList();
+  }
+
+  Future<List<Product>> searchProducts(String query) async {
+    final response = await http.get(
+      Uri.parse(
+        'https://dummyjson.com/products/search?q=${Uri.encodeQueryComponent(query)}',
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Unable to search products.');
+    }
+
+    final decodedJson = jsonDecode(response.body) as Map<String, dynamic>;
+    final productsJson = decodedJson['products'] as List? ?? [];
     return productsJson.map((json) => Product.fromJson(json)).toList();
   }
 

@@ -2,7 +2,7 @@
     <!-- ENHANCEMENT 3: CartService calls DummyJSON over HTTPS. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="baculpo_advmoprog"
+        android:label="cruz_advmobprog"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

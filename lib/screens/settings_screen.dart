@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 // providers
 import '../providers/theme_provider.dart';
+import '../services/user_service.dart';
 
 // widgets
 import '../widgets/custom_text.dart';
@@ -52,25 +53,59 @@ class SettingsScreen extends StatelessWidget {
                 value: themeModel.isDark,
                 onChanged: (_) => context.read<ThemeProvider>().toggleTheme(),
                 secondary: Icon(
-                  themeModel.isDark ? Icons.dark_mode : Icons.light_mode,
+                  themeModel.isDark
+                      ? Icons.dark_mode_outlined
+                      : Icons.light_mode_outlined,
                   size: 24.sp,
                 ),
                 title: CustomText(
-                  text: 'Dark Mode',
+                  text: themeModel.isDark ? 'Dark mode' : 'Light mode',
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),
                 subtitle: CustomText(
                   text: themeModel.isDark
-                      ? 'Dark theme is on'
-                      : 'Light theme is on',
+                      ? 'Dark mode is active'
+                      : 'Light mode is active',
                   fontSize: 12.sp,
                 ),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            CustomText(
+              text: 'ACCOUNT',
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+            ),
+            SizedBox(height: 8.h),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                side: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              child: ListTile(
+                leading: Icon(
+                  Icons.logout,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                title: const Text('Log out'),
+                subtitle: const Text(
+                  'Clear this device session and return to sign in',
+                ),
+                onTap: () => _signOut(context),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    await UserService().signOut();
+    if (!context.mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
   }
 }

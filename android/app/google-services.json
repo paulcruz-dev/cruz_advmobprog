@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "93629179119",
+    "project_id": "cruz-advmobprog",
+    "storage_bucket": "cruz-advmobprog.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93629179119:android:2c6a5e10c5acded830671a",
+        "android_client_info": {
+          "package_name": "com.example.cruz_advmobprog"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBr_PQDX_hWBKTKqFL1wMcMeFdRI4QDe8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

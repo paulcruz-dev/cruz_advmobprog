@@ -22,7 +22,7 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
-  late final Future<List<Product>> _productsFuture;
+  late Future<List<Product>> _productsFuture;
 
   // ENHANCEMENT 1: state backing the search bar.
   final TextEditingController _searchController = TextEditingController();
@@ -39,18 +39,6 @@ class _ProductScreenState extends State<ProductScreen> {
     // ENHANCEMENT 1: release the search controller.
     _searchController.dispose();
     super.dispose();
-  }
-
-  // ENHANCEMENT 1: filter the fetched list by title, brand or category.
-  List<Product> _filterProducts(List<Product> products) {
-    if (_searchQuery.trim().isEmpty) return products;
-
-    final query = _searchQuery.toLowerCase().trim();
-    return products.where((product) {
-      return product.title.toLowerCase().contains(query) ||
-          product.brand.toLowerCase().contains(query) ||
-          product.category.toLowerCase().contains(query);
-    }).toList();
   }
 
   @override
@@ -83,6 +71,9 @@ class _ProductScreenState extends State<ProductScreen> {
                       onChanged: (value) {
                         setState(() {
                           _searchQuery = value;
+                          _productsFuture = value.trim().isEmpty
+                              ? ProductService().getAllProducts()
+                              : ProductService().searchProducts(value.trim());
                         });
                       },
                       style: TextStyle(fontFamily: 'Poppins', fontSize: 14.sp),
@@ -134,8 +125,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   );
                 }
 
-                // ENHANCEMENT 1: apply the search query to the API result.
-                final products = _filterProducts(snapshot.data ?? []);
+                final products = snapshot.data ?? [];
                 if (products.isEmpty) {
                   return Center(
                     child: CustomText(
@@ -198,6 +188,11 @@ class _ProductScreenState extends State<ProductScreen> {
                                     fontWeight: FontWeight.bold,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  CustomText(
+                                    text: 'ID: ${product.id}',
+                                    fontSize: 11.sp,
                                   ),
                                   SizedBox(height: 4.h),
                                   CustomText(

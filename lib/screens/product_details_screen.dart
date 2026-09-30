@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 // models
 import '../models/product_model.dart';
 import '../services/cart_service.dart';
+import '../services/user_service.dart';
 
 // widgets
 import '../widgets/custom_text.dart';
@@ -20,14 +21,18 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool _isAddingToCart = false;
 
-  // ENHANCEMENT 3: send the selected product id and quantity to /carts/add.
+  // Add the selected product to the signed-in user's persistent local cart.
   Future<void> _addToCart() async {
     setState(() => _isAddingToCart = true);
     try {
-      await CartService().addToCart(userId: 5, productId: widget.product.id);
+      final user = await UserService().getUser();
+      if (user.id <= 0) {
+        throw StateError('Please sign in before adding products to your cart.');
+      }
+      await CartService().addProduct(userId: user.id, product: widget.product);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product added to the demo cart.')),
+        const SnackBar(content: Text('Product added to your cart.')),
       );
     } catch (_) {
       if (!mounted) return;
@@ -146,7 +151,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ? SizedBox(
                           height: 18.sp,
                           width: 18.sp,
-                          child: const CircularProgressIndicator(strokeWidth: 2),
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Icon(Icons.add_shopping_cart),
                   label: Text(_isAddingToCart ? 'Adding...' : 'Add to cart'),

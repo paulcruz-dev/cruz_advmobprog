@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "baculpo_advmoprog" "\0"
+            VALUE "FileDescription", "cruz_advmobprog" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "baculpo_advmoprog" "\0"
+            VALUE "InternalName", "cruz_advmobprog" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "baculpo_advmoprog.exe" "\0"
-            VALUE "ProductName", "baculpo_advmoprog" "\0"
+            VALUE "OriginalFilename", "cruz_advmobprog.exe" "\0"
+            VALUE "ProductName", "cruz_advmobprog" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

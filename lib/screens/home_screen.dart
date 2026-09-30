@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'product_screen.dart';
 import 'cart_screen.dart';
+import 'chat_screen.dart';
+import 'profile_screen.dart';
 
 import '../widgets/custom_text.dart';
 
@@ -27,16 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
           automaticallyImplyLeading: false,
           elevation: 2,
           title: (_selectedIndex == 0)
-              ? Image.asset(
-                  'assets/images/nubdexchange_logo.png',
-                  scale: 11.sp,
-                )
+              ? Image.asset('assets/images/nubdexchange_logo.png', scale: 11.sp)
               : CustomText(
                   text: (_selectedIndex == 1)
                       ? 'Cart'
                       : (_selectedIndex == 2)
-                          ? 'Profile'
-                          : 'Home',
+                      ? 'Chats'
+                      : (_selectedIndex == 3)
+                      ? 'Profile'
+                      : 'Home',
                   fontSize: 20.sp,
                   // color: FB_LIGHT_PRIMARY,
                   fontWeight: FontWeight.w600,
@@ -51,10 +52,11 @@ class _HomeScreenState extends State<HomeScreen> {
         body: PageView(
           physics: const NeverScrollableScrollPhysics(),
           controller: _pageController,
-          children: const <Widget>[
-            ProductScreen(),
-            CartScreen(),
-            Center(child: Text('Profile')),
+          children: <Widget>[
+            const ProductScreen(),
+            const CartScreen(),
+            const ChatScreen(),
+            ProfileScreen(onSignedOut: () => _onTappedBar(0)),
           ],
           onPageChanged: (page) {
             setState(() {
@@ -62,20 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
         ),
-        // ENHANCEMENT 2: chat moved from the navigation bar into a FAB.
-        // It is deliberately hidden while the cart is the active screen.
-        floatingActionButton: _selectedIndex == 1
-            ? null
-            : FloatingActionButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Chat is not available yet.')),
-                  );
-                },
-                tooltip: 'Chat',
-                child: const Icon(Icons.chat),
-              ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: BottomNavigationBar(
           showSelectedLabels: false, //selected item
           showUnselectedLabels: false, //unselected item
@@ -83,8 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.shop_2), label: 'Shop'),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
+              icon: Icon(Icons.shopping_cart_outlined),
+              activeIcon: Icon(Icons.shopping_cart),
               label: 'Cart',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline),
+              activeIcon: Icon(Icons.chat_bubble),
+              label: 'Chats',
             ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
